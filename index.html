@@ -1,48 +1,34 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Galeri Karya Siswa</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <h1>Galeri Karya Siswa</h1>
-    <div class="controls">
-      <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau judul...">
-      <select id="filterKelas">
-        <option value="">Semua Kelas</option>
-      </select>
-      <select id="sortTanggal">
-        <option value="desc">Terbaru</option>
-        <option value="asc">Terlama</option>
-      </select>
-    </div>
+    <p>Menampilkan hasil karya terbaik siswa secara online 📚✨</p>
   </header>
 
-  <main id="gallery"></main>
-
   <div class="filter-bar">
-  <input type="text" id="search" placeholder="Cari karya...">
-  <select id="filter-kelas">
-    <option value="semua">Semua Kelas</option>
-  </select>
-  <select id="sort-tanggal">
-    <option value="baru">Terbaru</option>
-    <option value="lama">Terlama</option>
-  </select>
-</div>
+    <input type="text" id="search" placeholder="Cari karya..." />
+    <select id="filter-kelas">
+      <option value="semua">Semua Kelas</option>
+    </select>
+    <select id="sort-tanggal">
+      <option value="baru">Terbaru</option>
+      <option value="lama">Terlama</option>
+    </select>
+  </div>
 
-<div id="karya-container"></div>
-
-<script src="script.js"></script>
+  <main id="karya-container"></main>
 
   <footer>
-    <p>© 2025 Galeri Karya Siswa MTs Al-Ikhlas</p>
+    <p>© 2025 Galeri Karya Siswa | Dibuat dengan ❤️ oleh Guru Informatika</p>
   </footer>
 
   <script src="script.js"></script>
 </body>
 </html>
-
