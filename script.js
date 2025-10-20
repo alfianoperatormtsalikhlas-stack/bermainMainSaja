@@ -1,5 +1,5 @@
 // === URL Spreadsheet ===
-// Ganti dengan ID spreadsheet kamu & nama sheet/tab yang sesuai
+// Ganti dengan ID dan nama sheet/tab milikmu
 const sheetURL =
   "https://opensheet.elk.sh/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/Sheet1";
 
@@ -34,16 +34,16 @@ function tampilkanKarya(data) {
     return;
   }
 
-  data.forEach((karya, index) => {
+  data.forEach((karya) => {
     const gambar = (karya.Gambar || "").trim();
     const imgSrc = gambar.startsWith("http")
       ? gambar
-      : "https://namasite.netlify.app/assets/placeholder.jpg"; // ganti domain kamu
+      : "assets/placeholder.jpg"; // gunakan path lokal
 
     const deskripsi = karya.Deskripsi || "";
     const ringkas =
-      deskripsi.length > 100
-        ? deskripsi.substring(0, 100) + "..."
+      deskripsi.length > 120
+        ? deskripsi.substring(0, 120) + "..."
         : deskripsi;
 
     const card = document.createElement("div");
@@ -54,21 +54,21 @@ function tampilkanKarya(data) {
       <h3>${karya.Judul || "Tanpa Judul"}</h3>
       <p class="desc">${ringkas}</p>
       ${
-        deskripsi.length > 100
+        deskripsi.length > 120
           ? `<button class="baca" data-full="${deskripsi.replace(
               /"/g,
               "&quot;"
             )}">Baca Selengkapnya</button>`
           : ""
       }
-      <small><b>${karya.Nama || ""}</b> | ${
-      karya.Kelas || "-"
-    } | ${karya.Tanggal || ""}</small>
+      <small><b>${karya.Nama || ""}</b> | ${karya.Kelas || "-"} | ${
+      karya.Tanggal || ""
+    }</small>
     `;
     container.appendChild(card);
   });
 
-  // Atur layout 4 kolom per baris dengan CSS Grid
+  // Atur layout 4 kolom
   container.style.display = "grid";
   container.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
   container.style.gap = "1rem";
@@ -81,7 +81,7 @@ function tampilkanKarya(data) {
   });
 }
 
-// === Fungsi Dropdown Filter Kelas ===
+// === Isi Dropdown Kelas ===
 function isiDropdownKelas(data) {
   const kelasUnik = [
     ...new Set(data.map((k) => (k.Kelas || "").trim()).filter((x) => x)),
