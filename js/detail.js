@@ -16,10 +16,15 @@ async function tampilkanDetail() {
     return;
   }
 
-  const imgSrc =
-    karya.Gambar && karya.Gambar.startsWith("http")
-      ? karya.Gambar
-      : "assets/placeholder.jpg";
+  let imgSrc = "assets/placeholder.jpg";
+    if (karya.Gambar && karya.Gambar.includes("drive.google.com")) {
+      const match = karya.Gambar.match(/\/d\/(.*?)\//);
+      if (match) {
+        imgSrc = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+      }
+    } else if (karya.Gambar && karya.Gambar.startsWith("http")) {
+      imgSrc = karya.Gambar;
+    }
 
   container.innerHTML = `
     <h2>${karya.Judul}</h2>
@@ -31,3 +36,4 @@ async function tampilkanDetail() {
 }
 
 tampilkanDetail();
+
