@@ -1,106 +1,128 @@
-const SHEET_URL = "https://opensheet.elk.sh/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/Sheet1";
+// === URL Spreadsheet ===
+// Ganti dengan ID spreadsheet kamu & nama sheet/tab yang sesuai
+const sheetURL =
+  "https://opensheet.elk.sh/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/Sheet1";
 
-async function loadKarya() {
-  const res = await fetch(SHEET_URL);
-  const data = await res.json();
-  return data;
-}
+// === Elemen HTML ===
+const container = document.getElementById("karya-container");
+const searchInput = document.getElementById("search");
+const filterKelas = document.getElementById("filter-kelas");
+const sortTanggal = document.getElementById("sort-tanggal");
 
-function createCard(karya) {
-  const gambar = (karya.Gambar || "").trim();
-  const imgSrc = gambar.startsWith("http")
-    ? gambar
-    : "https://namasite.netlify.app/assets/placeholder.jpg";
-  
-  const img = document.createElement("img");
-  img.src = imgSrc;
-  img.alt = karya.Judul || "Karya siswa";
-  card.appendChild(img);
-  const shortDesc = karya.Deskripsi.length > 100 ? karya.Deskripsi.substring(0, 100) + "..." : karya.Deskripsi;
+let semuaKarya = [];
 
-  return `
-    <div class="card" data-kelas="${karya.Kelas}" data-tanggal="${karya.Tanggal}">
-      <img src="${imgSrc}" alt="${karya.Judul}">
-      <div class="card-content">
-        <h3>${karya.Judul}</h3>
-        <p><strong>${karya.Nama}</strong> - ${karya.Kelas}</p>
-        <div class="description">
-          <p class="short">${shortDesc}</p>
-          <p class="full hidden">${karya.Deskripsi}</p>
-          ${karya.Deskripsi.length > 100 ? `<button class="toggle-btn">Baca Selengkapnya</button>` : ""}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderGallery(karyaList) {
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = karyaList.map(createCard).join("");
-}
-
-function initFilterOptions(data) {
-  const filterKelas = document.getElementById("filterKelas");
-  const kelasList = [...new Set(data.map(d => d.Kelas))];
-  kelasList.forEach(k => {
-    const opt = document.createElement("option");
-    opt.value = k;
-    opt.textContent = k;
-    filterKelas.appendChild(opt);
+// === Ambil Data dari Spreadsheet ===
+fetch(sheetURL)
+  .then((res) => res.json())
+  .then((data) => {
+    semuaKarya = data;
+    tampilkanKarya(semuaKarya);
+    isiDropdownKelas(data);
+  })
+  .catch((err) => {
+    console.error("Gagal memuat data:", err);
+    container.innerHTML =
+      "<p style='color:red'>Gagal memuat data. Pastikan Spreadsheet publik.</p>";
   });
-}
 
-async function init() {
-  let karyaList = await loadKarya();
-  renderGallery(karyaList);
-  initFilterOptions(karyaList);
+// === Fungsi Tampilkan Karya ===
+function tampilkanKarya(data) {
+  container.innerHTML = "";
 
-  const searchInput = document.getElementById("searchInput");
-  const filterKelas = document.getElementById("filterKelas");
-  const sortTanggal = document.getElementById("sortTanggal");
-
-  function applyFilters() {
-    let filtered = karyaList;
-
-    // Filter berdasarkan pencarian
-    const search = searchInput.value.toLowerCase();
-    if (search) {
-      filtered = filtered.filter(k =>
-        k.Nama.toLowerCase().includes(search) ||
-        k.Judul.toLowerCase().includes(search)
-      );
-    }
-
-    // Filter berdasarkan kelas
-    const kelas = filterKelas.value;
-    if (kelas) {
-      filtered = filtered.filter(k => k.Kelas === kelas);
-    }
-
-    // Urutkan berdasarkan tanggal
-    filtered.sort((a, b) => {
-      const da = new Date(a.Tanggal);
-      const db = new Date(b.Tanggal);
-      return sortTanggal.value === "asc" ? da - db : db - da;
-    });
-
-    renderGallery(filtered);
+  if (data.length === 0) {
+    container.innerHTML = "<p>Tidak ada karya ditemukan.</p>";
+    return;
   }
 
-  [searchInput, filterKelas, sortTanggal].forEach(el => el.addEventListener("input", applyFilters));
+  data.forEach((karya, index) => {
+    const gambar = (karya.Gambar || "").trim();
+    const imgSrc = gambar.startsWith("http")
+      ? gambar
+      : "https://namasite.netlify.app/assets/placeholder.jpg"; // ganti domain kamu
 
-  // Toggle "Baca Selengkapnya"
-  document.addEventListener("click", function(e) {
-    if (e.target.classList.contains("toggle-btn")) {
-      const card = e.target.closest(".description");
-      card.querySelector(".short").classList.toggle("hidden");
-      card.querySelector(".full").classList.toggle("hidden");
-      e.target.textContent =
-        e.target.textContent === "Baca Selengkapnya" ? "Sembunyikan" : "Baca Selengkapnya";
-    }
+    const deskripsi = karya.Deskripsi || "";
+    const ringkas =
+      deskripsi.length > 100
+        ? deskripsi.substring(0, 100) + "..."
+        : deskripsi;
+
+    const card = document.createElement("div");
+    card.classList.add("card");
+
+    card.innerHTML = `
+      <img src="${imgSrc}" alt="${karya.Judul}">
+      <h3>${karya.Judul || "Tanpa Judul"}</h3>
+      <p class="desc">${ringkas}</p>
+      ${
+        deskripsi.length > 100
+          ? `<button class="baca" data-full="${deskripsi.replace(
+              /"/g,
+              "&quot;"
+            )}">Baca Selengkapnya</button>`
+          : ""
+      }
+      <small><b>${karya.Nama || ""}</b> | ${
+      karya.Kelas || "-"
+    } | ${karya.Tanggal || ""}</small>
+    `;
+    container.appendChild(card);
+  });
+
+  // Atur layout 4 kolom per baris dengan CSS Grid
+  container.style.display = "grid";
+  container.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
+  container.style.gap = "1rem";
+
+  // Tambahkan event untuk tombol "Baca Selengkapnya"
+  document.querySelectorAll(".baca").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      alert(btn.getAttribute("data-full"));
+    });
   });
 }
 
-init();
+// === Fungsi Dropdown Filter Kelas ===
+function isiDropdownKelas(data) {
+  const kelasUnik = [
+    ...new Set(data.map((k) => (k.Kelas || "").trim()).filter((x) => x)),
+  ];
+  kelasUnik.forEach((kelas) => {
+    const option = document.createElement("option");
+    option.value = kelas;
+    option.textContent = kelas;
+    filterKelas.appendChild(option);
+  });
+}
 
+// === Fungsi Pencarian ===
+searchInput.addEventListener("input", () => {
+  const keyword = searchInput.value.toLowerCase();
+  const hasil = semuaKarya.filter(
+    (k) =>
+      k.Judul?.toLowerCase().includes(keyword) ||
+      k.Nama?.toLowerCase().includes(keyword) ||
+      k.Deskripsi?.toLowerCase().includes(keyword)
+  );
+  tampilkanKarya(hasil);
+});
 
+// === Fungsi Filter Berdasarkan Kelas ===
+filterKelas.addEventListener("change", () => {
+  const val = filterKelas.value;
+  const hasil =
+    val === "semua"
+      ? semuaKarya
+      : semuaKarya.filter((k) => (k.Kelas || "").trim() === val);
+  tampilkanKarya(hasil);
+});
+
+// === Fungsi Urutkan Berdasarkan Tanggal ===
+sortTanggal.addEventListener("change", () => {
+  const arah = sortTanggal.value;
+  const hasil = [...semuaKarya].sort((a, b) => {
+    const tglA = new Date(a.Tanggal || "1970-01-01");
+    const tglB = new Date(b.Tanggal || "1970-01-01");
+    return arah === "baru" ? tglB - tglA : tglA - tglB;
+  });
+  tampilkanKarya(hasil);
+});
