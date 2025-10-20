@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galeri Karya Siswa</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <h1>Galeri Karya Siswa</h1>
+
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="Cari berdasarkan judul atau nama..." />
+    <select id="kelasFilter">
+      <option value="">Semua Kelas</option>
+      <option value="7A">Kelas 7A</option>
+      <option value="7B">Kelas 7B</option>
+      <option value="8A">Kelas 8A</option>
+      <option value="8B">Kelas 8B</option>
+    </select>
+    <select id="sortSelect">
+      <option value="desc">Terbaru</option>
+      <option value="asc">Terlama</option>
+    </select>
+  </div>
+
+  <div id="karyaContainer" class="grid-container"></div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
