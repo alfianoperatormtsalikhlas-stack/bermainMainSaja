@@ -1,39 +1,28 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const spreadsheetUrl =
-    "https://docs.google.com/spreadsheets/d/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/gviz/tq?tqx=out:json";
+    "https://opensheet.elk.sh/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/Sheet1";
 
   const karyaContainer = document.getElementById("karyaContainer");
   const searchInput = document.getElementById("searchInput");
   const filterKelas = document.getElementById("filterKelas");
   const sortTanggal = document.getElementById("sortTanggal");
 
-  // Ambil data dari Spreadsheet
+  // Ambil data dari OpenSheet
   const response = await fetch(spreadsheetUrl);
-  const text = await response.text();
-  const json = JSON.parse(text.substr(47).slice(0, -2));
+  const data = await response.json();
 
-  const data = json.table.rows.map((row) => ({
-    No: row.c[0]?.v || "",
-    Nama: row.c[1]?.v || "",
-    Judul: row.c[2]?.v || "",
-    Deskripsi: row.c[3]?.v || "",
-    Gambar: row.c[4]?.v || "",
-    Kelas: row.c[5]?.v || "",
-    Tanggal: parseTanggal(row.c[6]?.v || "")
+  // Pastikan format kolom sama dengan spreadsheet
+  const karyaList = data.map((row) => ({
+    No: row.No,
+    Nama: row.Nama,
+    Judul: row.Judul,
+    Deskripsi: row.Deskripsi || "",
+    Gambar: row.Gambar || "",
+    Kelas: row.Kelas || "",
+    Tanggal: row.Tanggal || "",
   }));
 
-  let karyaList = [...data];
-
-  // Fungsi parsing tanggal
-  function parseTanggal(value) {
-    if (!value) return null;
-    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-      return new Date(value);
-    }
-    return new Date(value);
-  }
-
-  // Konversi link Google Drive ke format tampil
+  // Konversi link Google Drive ke link langsung
   function convertDriveLink(url) {
     const match = url.match(/\/d\/(.*?)\//);
     if (match && match[1]) {
@@ -43,12 +32,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Format tanggal
-  function formatTanggal(date) {
-    if (!(date instanceof Date) || isNaN(date)) return "-";
+  function formatTanggal(value) {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (isNaN(date)) return value;
     return date.toISOString().split("T")[0];
   }
 
-  // Render kartu karya
+  // Render karya ke halaman
   function renderKarya(list) {
     karyaContainer.innerHTML = "";
 
@@ -87,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Isi dropdown kelas
-  const kelasList = [...new Set(data.map((d) => d.Kelas).filter(Boolean))];
+  const kelasList = [...new Set(karyaList.map((d) => d.Kelas).filter(Boolean))];
   kelasList.forEach((kelas) => {
     const option = document.createElement("option");
     option.value = kelas;
@@ -98,36 +89,34 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Event: pencarian
   searchInput.addEventListener("input", () => {
     const query = searchInput.value.toLowerCase();
-    const filtered = data.filter(
+    const filtered = karyaList.filter(
       (k) =>
         k.Nama.toLowerCase().includes(query) ||
         k.Judul.toLowerCase().includes(query) ||
         k.Deskripsi.toLowerCase().includes(query)
     );
-    karyaList = filtered;
-    renderKarya(karyaList);
+    renderKarya(filtered);
   });
 
   // Event: filter kelas
   filterKelas.addEventListener("change", () => {
     const selected = filterKelas.value;
-    karyaList = selected
-      ? data.filter((d) => d.Kelas === selected)
-      : [...data];
-    renderKarya(karyaList);
+    const filtered = selected
+      ? karyaList.filter((d) => d.Kelas === selected)
+      : [...karyaList];
+    renderKarya(filtered);
   });
 
   // Event: urutkan tanggal
   sortTanggal.addEventListener("change", () => {
     const order = sortTanggal.value;
-    if (order === "terbaru") {
-      karyaList.sort((a, b) => b.Tanggal - a.Tanggal);
-    } else if (order === "terlama") {
-      karyaList.sort((a, b) => a.Tanggal - b.Tanggal);
-    }
-    renderKarya(karyaList);
+    const sorted = [...karyaList].sort((a, b) => {
+      const dateA = new Date(a.Tanggal);
+      const dateB = new Date(b.Tanggal);
+      return order === "terbaru" ? dateB - dateA : dateA - dateB;
+    });
+    renderKarya(sorted);
   });
 
   renderKarya(karyaList);
 });
-
