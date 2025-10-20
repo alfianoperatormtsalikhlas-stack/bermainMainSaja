@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const spreadsheetUrl =
-    "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE/gviz/tq?tqx=out:json";
+    "https://docs.google.com/spreadsheets/d/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/gviz/tq?tqx=out:json";
 
   const karyaContainer = document.getElementById("karyaContainer");
   const searchInput = document.getElementById("searchInput");
@@ -130,3 +130,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   renderKarya(karyaList);
 });
+
