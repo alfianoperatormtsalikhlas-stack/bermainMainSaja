@@ -7,7 +7,9 @@ async function loadKarya() {
 }
 
 function createCard(karya) {
-  const imgSrc = karya.Gambar ? karya.Gambar : "assets\placeholder.jpg";
+  const imgSrc = karya.Gambar && karya.Gambar.startsWith("http")
+  ? karya.Gambar
+  : "assets/placeholder.jpg";
   const shortDesc = karya.Deskripsi.length > 100 ? karya.Deskripsi.substring(0, 100) + "..." : karya.Deskripsi;
 
   return `
@@ -94,3 +96,4 @@ async function init() {
 }
 
 init();
+
