@@ -1,39 +1,52 @@
-const sheetURL =
-  "https://opensheet.elk.sh/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/Sheet1";
+document.addEventListener("DOMContentLoaded", async () => {
+  const spreadsheetUrl =
+    "https://docs.google.com/spreadsheets/d/11jeNfwlrUw18Qbc0LVD6ZTcum-i63KuZ-N8Z4yMwQq8/gviz/tq?tqx=out:json";
 
-const container = document.getElementById("detailContainer");
+  const params = new URLSearchParams(window.location.search);
+  const no = params.get("no");
 
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+  const judulEl = document.getElementById("judul");
+  const gambarEl = document.getElementById("gambar");
+  const namaEl = document.getElementById("nama");
+  const kelasEl = document.getElementById("kelas");
+  const tanggalEl = document.getElementById("tanggal");
+  const deskripsiEl = document.getElementById("deskripsi");
 
-async function tampilkanDetail() {
-  const res = await fetch(sheetURL);
-  const data = await res.json();
-  const karya = data.find((k) => k.No === id);
+  const response = await fetch(spreadsheetUrl);
+  const text = await response.text();
+  const json = JSON.parse(text.substr(47).slice(0, -2));
 
-  if (!karya) {
-    container.innerHTML = "<p>Karya tidak ditemukan.</p>";
-    return;
+  const data = json.table.rows.map((row) => ({
+    No: row.c[0]?.v || "",
+    Nama: row.c[1]?.v || "",
+    Judul: row.c[2]?.v || "",
+    Deskripsi: row.c[3]?.v || "",
+    Gambar: row.c[4]?.v || "",
+    Kelas: row.c[5]?.v || "",
+    Tanggal: row.c[6]?.v || ""
+  }));
+
+  const karya = data.find((d) => d.No == no);
+
+  if (karya) {
+    const imgSrc =
+      karya.Gambar && karya.Gambar.startsWith("http")
+        ? convertDriveLink(karya.Gambar)
+        : "assets/placeholder.jpg";
+
+    judulEl.textContent = karya.Judul;
+    gambarEl.src = imgSrc;
+    namaEl.textContent = karya.Nama;
+    kelasEl.textContent = karya.Kelas;
+    tanggalEl.textContent = karya.Tanggal;
+    deskripsiEl.textContent = karya.Deskripsi;
   }
 
-  let imgSrc = "assets/placeholder.jpg";
-    if (karya.Gambar && karya.Gambar.includes("drive.google.com")) {
-      const match = karya.Gambar.match(/\/d\/(.*?)\//);
-      if (match) {
-        imgSrc = `https://drive.google.com/uc?export=view&id=${match[1]}`;
-      }
-    } else if (karya.Gambar && karya.Gambar.startsWith("http")) {
-      imgSrc = karya.Gambar;
+  function convertDriveLink(url) {
+    const match = url.match(/\/d\/(.*?)\//);
+    if (match && match[1]) {
+      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
     }
-
-  container.innerHTML = `
-    <h2>${karya.Judul}</h2>
-    <p><strong>${karya.Nama}</strong> (${karya.Kelas || "-"})</p>
-    <img src="${imgSrc}" alt="${karya.Judul}" class="detail-img" />
-    <p>${karya.Deskripsi}</p>
-    <p><em>Tanggal: ${karya.TANGGAL}</em></p>
-  `;
-}
-
-tampilkanDetail();
-
+    return url;
+  }
+});
