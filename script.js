@@ -7,9 +7,15 @@ async function loadKarya() {
 }
 
 function createCard(karya) {
-  const imgSrc = karya.Gambar && karya.Gambar.startsWith("http")
-  ? karya.Gambar
-  : "assets/placeholder.jpg";
+  const gambar = (karya.Gambar || "").trim();
+  const imgSrc = gambar.startsWith("http")
+    ? gambar
+    : "https://namasite.netlify.app/assets/placeholder.jpg";
+  
+  const img = document.createElement("img");
+  img.src = imgSrc;
+  img.alt = karya.Judul || "Karya siswa";
+  card.appendChild(img);
   const shortDesc = karya.Deskripsi.length > 100 ? karya.Deskripsi.substring(0, 100) + "..." : karya.Deskripsi;
 
   return `
@@ -96,4 +102,5 @@ async function init() {
 }
 
 init();
+
 
